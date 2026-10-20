@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>+1 Stone Skipping Script — stone-skip-plus-one</title>
+<meta name="description" content="+1 Stone Skipping Script for Windows 10/11. Adds +1 to every skip, combo multipliers, ricochet bounce counters, and per-bounce score tracking. Free & open source.">
+<style>
+  :root{
+    --bg-0:#070b1a;
+    --bg-1:#0d1330;
+    --bg-2:#141a3d;
+    --ink:#eef1ff;
+    --muted:#a3aacb;
+    --accent:#7c6cff;
+    --accent-2:#3fd0ff;
+    --accent-3:#ff7ad9;
+    --line:rgba(255,255,255,.10);
+    --card:rgba(255,255,255,.045);
+    --card-hover:rgba(255,255,255,.075);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 700px at 12% -10%, rgba(124,108,255,.30), transparent 60%),
+      radial-gradient(900px 600px at 92% 4%, rgba(63,208,255,.18), transparent 55%),
+      radial-gradient(800px 700px at 50% 110%, rgba(255,122,217,.14), transparent 60%),
+      linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{width:min(1120px,92vw);margin:0 auto}
+
+  /* ---------------- NAV ---------------- */
+  .nav-outer{position:sticky;top:0;z-index:50;padding:14px 0}
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;
+    padding:12px 18px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:rgba(13,19,48,.55);
+    backdrop-filter:blur(16px) saturate(160%);
+    -webkit-backdrop-filter:blur(16px) saturate(160%);
+    box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;font-size:1.02rem}
+  .brand .mark{
+    width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 6px 18px rgba(124,108,255,.45);
+  }
+  .brand span.hl{
+    background:linear-gradient(90deg,var(--accent-2),var(--accent),var(--accent-3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .nav-links{display:flex;align-items:center;gap:26px;font-size:.94rem;color:var(--muted);font-weight:600}
+  .nav-links a{transition:color .2s ease}
+  .nav-links a:hover{color:var(--ink)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-weight:700;font-size:.95rem;
+    padding:12px 22px;border-radius:12px;border:1px solid transparent;
+    cursor:pointer;transition:transform .18s ease, box-shadow .25s ease, background .25s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--accent) 0%, #5b8cff 55%, var(--accent-2) 100%);
+    color:#fff;
+    box-shadow:0 10px 26px rgba(92,124,255,.38), inset 0 1px 0 rgba(255,255,255,.25);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(92,124,255,.5)}
+  .btn-ghost{
+    background:rgba(255,255,255,.04);
+    border-color:var(--line);
+    color:var(--ink);
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
+  .nav .btn{padding:10px 18px;font-size:.9rem}
+
+  /* ---------------- HERO ---------------- */
+  .hero{padding:76px 0 40px;text-align:center;position:relative}
+  .pill{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:8px 16px;border-radius:999px;
+    border:1px solid rgba(124,108,255,.42);
+    background:rgba(124,108,255,.12);
+    color:#c9c2ff;font-size:.82rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+    box-shadow:0 0 0 4px rgba(124,108,255,.06);
+  }
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 10px var(--accent-2);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{
+    margin:26px auto 0;max-width:900px;
+    font-size:clamp(2.1rem,5.6vw,4rem);
+    line-height:1.08;letter-spacing:-.02em;font-weight:900;
+    background:linear-gradient(100deg,#ffffff 8%, var(--accent-2) 38%, var(--accent) 62%, var(--accent-3) 92%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p.lead{
+    max-width:660px;margin:22px auto 0;color:var(--muted);font-size:clamp(1rem,1.9vw,1.13rem);
+  }
+  .hero-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:34px}
+  .hero-actions .btn{padding:15px 30px;font-size:1rem}
+  .stats{
+    display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:44px;
+  }
+  .chip{
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+    padding:12px 22px;border-radius:14px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.04);
+    backdrop-filter:blur(8px);
+    min-width:130px;
+  }
+  .chip b{font-size:1.05rem;letter-spacing:.2px}
+  .chip small{color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.9px;font-weight:700}
+
+  /* ---------------- SECTION HEADINGS ---------------- */
+  section{padding:64px 0}
+  .sec-head{text-align:center;max-width:640px;margin:0 auto 44px}
+  .sec-head .kicker{
+    font-size:.78rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;
+    color:var(--accent-2);
+  }
+  .sec-head h2{
+    margin-top:10px;font-size:clamp(1.6rem,3.4vw,2.35rem);line-height:1.15;letter-spacing:-.01em;font-weight:850;
+  }
+  .sec-head p{margin-top:12px;color:var(--muted);font-size:.98rem}
+
+  /* ---------------- FEATURES ---------------- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{
+    position:relative;overflow:hidden;
+    padding:26px 24px 24px;
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    background:var(--card);
+    transition:transform .22s ease, background .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  .card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    opacity:.9;
+  }
+  .card:nth-child(2)::before{background:linear-gradient(90deg,var(--accent-2),#4affc2)}
+  .card:nth-child(3)::before{background:linear-gradient(90deg,var(--accent-3),var(--accent))}
+  .card:nth-child(4)::before{background:linear-gradient(90deg,#ffb86b,var(--accent-3))}
+  .card:nth-child(5)::before{background:linear-gradient(90deg,#4affc2,var(--accent-2))}
+  .card:nth-child(6)::before{background:linear-gradient(90deg,var(--accent),#5b8cff)}
+  .card:hover{
+    transform:translateY(-7px);
+    background:var(--card-hover);
+    border-color:rgba(124,108,255,.4);
+    box-shadow:0 22px 44px rgba(0,0,0,.45), 0 0 0 1px rgba(124,108,255,.15);
+  }
+  .card .icon{
+    width:48px;height:48px;border-radius:13px;display:grid;place-items:center;
+    font-size:23px;margin-bottom:16px;
+    background:rgba(124,108,255,.13);
+    border:1px solid rgba(124,108,255,.25);
+  }
+  .card h3{font-size:1.06rem;font-weight:800;margin-bottom:8px;letter-spacing:.1px}
+  .card p{color:var(--muted);font-size:.92rem}
+
+  /* ---------------- HOW IT WORKS ---------------- */
+  .steps{position:relative;max-width:720px;margin:0 auto;padding-left:8px}
+  .steps::before{
+    content:"";position:absolute;left:31px;top:14px;bottom:14px;width:2px;
+    background:linear-gradient(180deg,var(--accent-2),var(--accent),var(--accent-3));
+    border-radius:2px;opacity:.75;
+  }
+  .step{position:relative;display:flex;gap:24px;padding:0 0 38px 0}
+  .step:last-child{padding-bottom:0}
+  .step .num{
+    flex:0 0 48px;width:48px;height:48px;border-radius:50%;
+    display:grid;place-items:center;font-weight:900;font-size:1.05rem;
+    background:linear-gradient(135deg,#191f45,#0f1430);
+    border:1px solid rgba(124,108,255,.5);
+    color:#dfe3ff;
+    box-shadow:0 0 0 5px rgba(7,11,26,.9), 0 0 22px rgba(124,108,255,.35);
+    z-index:1;
+  }
+  .step .body{padding-top:4px}
+  .step h3{font-size:1.08rem;font-weight:800;margin-bottom:6px}
+  .step p{color:var(--muted);font-size:.94rem;max-width:540px}
+
+  /* ---------------- FAQ ---------------- */
+  .faq{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  details{
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:rgba(255,255,255,.035);
+    overflow:hidden;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  details[open]{border-color:rgba(124,108,255,.45);background:rgba(124,108,255,.07)}
+  summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:18px 22px;
+    font-weight:750;font-size:.99rem;
+    user-select:none;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary .plus{
+    flex:0 0 26px;width:26px;height:26px;border-radius:8px;
+    display:grid;place-items:center;position:relative;
+    background:rgba(124,108,255,.16);
+    border:1px solid rgba(124,108,255,.3);
+    transition:transform .28s ease, background .28s ease;
+  }
+  summary .plus::before,summary .plus::after{
+    content:"";position:absolute;background:#cfd4ff;border-radius:2px;
+    transition:transform .28s ease, opacity .2s ease;
+  }
+  summary .plus::before{width:12px;height:2px}
+  summary .plus::after{width:2px;height:12px}
+  details[open] summary .plus{transform:rotate(45deg);background:rgba(63,208,255,.22);border-color:rgba(63,208,255,.5)}
+  details p.answer{padding:0 22px 20px;color:var(--muted);font-size:.93rem;max-width:660px}
+  details p.answer code{
+    background:rgba(255,255,255,.08);padding:2px 7px;border-radius:6px;font-size:.86em;color:#cfd4ff;
+  }
+
+  /* ---------------- CTA BANNER ---------------- */
+  .cta-banner{
+    position:relative;overflow:hidden;
+    border-radius:26px;
+    border:1px solid rgba(124,108,255,.35);
+    padding:64px 28px;
+    text-align:center;
+    background:linear-gradient(140deg, rgba(124,108,255,.18), rgba(13,19,48,.6) 45%, rgba(63,208,255,.14));
+    box-shadow:0 30px 70px rgba(0,0,0,.45);
+  }
+  .cta-banner::before{
+    content:"";position:absolute;left:50%;top:50%;width:820px;height:820px;
+    transform:translate(-50%,-50%);
+    background:radial-gradient(circle, rgba(124,108,255,.42) 0%, rgba(63,208,255,.15) 42%, transparent 68%);
+    pointer-events:none;
+  }
+  .cta-banner > *{position:relative;z-index:1}
+  .cta-banner h2{
+    font-size:clamp(1.7rem,3.8vw,2.6rem);font-weight:900;letter-spacing:-.02em;line-height:1.12;
+    background:linear-gradient(100deg,#fff,var(--accent-2) 50%,var(--accent-3));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .cta-banner p{color:var(--muted);margin:16px auto 30px;max-width:520px;font-size:1rem}
+  .cta-banner .btn{padding:16px 36px;font-size:1.02rem}
+
+  /* ---------------- FOOTER ---------------- */
+  footer{
+    border-top:1px solid var(--line);
+    margin-top:40px;
+    padding:34px 0 44px;
+  }
+  .foot{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    font-size:.88rem;color:var(--muted);
+  }
+  .foot .left{display:flex;align-items:center;gap:10px;font-weight:600}
+  .foot a{color:#c9c2ff;font-weight:700;transition:color .2s}
+  .foot a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+
+  /* ---------------- RESPONSIVE ---------------- */
+  @media (max-width:960px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:640px){
+    .nav-links{display:none}
+    .nav{padding:10px 14px}
+    .brand{font-size:.95rem}
+    .nav .btn{padding:9px 14px;font-size:.85rem}
+    .hero{padding:52px 0 24px}
+    .hero-actions .btn{width:100%;max-width:320px}
+    .stats{gap:10px}
+    .chip{flex:1 1 44%;min-width:0;padding:11px 12px}
+    .grid{grid-template-columns:1fr}
+    section{padding:48px 0}
+    .steps::before{left:23px}
+    .step{gap:16px}
+    .step .num{flex-basis:40px;width:40px;height:40px;font-size:.92rem}
+    .cta-banner{padding:48px 20px;border-radius:20px}
+    .foot{flex-direction:column;text-align:center;justify-content:center}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <div class="nav-outer">
+    <div class="wrap">
+      <nav class="nav">
+        <a class="brand" href="#top">
+          <span class="mark">🪨</span>
+          <span>stone-skip<span class="hl">-plus-one</span></span>
+        </a>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <a class="btn btn-primary" href="https://gitscore.cc" target="_blank" rel="noopener">Download</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero wrap" id="top">
+    <span class="pill"><span class="dot"></span>+1 Stone Skipping Script</span>
+    <h1>Skip once more. Then skip again — with&nbsp;+1.</h1>
+    <p class="lead">
+      The +1 Stone Skipping Script rewrites every throw so each skip counts for one extra bounce.
+      Stack combo multipliers, track ricochet bounces, and watch per-bounce scores update in real time.
+      Built for Windows 10 &amp; 11, free and open source.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://gitscore.cc" target="_blank" rel="noopener">⬇ Download for Windows</a>
+      <a class="btn btn-ghost" href="https://gitscore.cc" target="_blank" rel="noopener">★ View on GitHub</a>
+    </div>
+    <div class="stats">
+      <div class="chip"><b>18,400+</b><small>Downloads</small></div>
+      <div class="chip"><b>v2.4.1</b><small>Version</small></div>
+      <div class="chip"><b>Windows 10 / 11</b><small>Platform</small></div>
+      <div class="chip"><b>Free &amp; open source</b><small>License</small></div>
+    </div>
+  </header>
+
+  <!-- ============ FEATURES ============ -->
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">Features</div>
+        <h2>Every skip gets +1. Every bounce gets counted.</h2>
+        <p>Six systems working together to turn a stone skipping run into a score-chasing combo engine.</p>
+      </div>
+      <div class="grid">
+        <article class="card">
+          <div class="icon">➕</div>
+          <h3>+1 Skip Injection</h3>
+          <p>Every stone contact on the water surface is incremented by exactly one extra skip, no matter the angle or spin.</p>
+        </article>
+        <article class="card">
+          <div class="icon">🔥</div>
+          <h3>Combo Multiplier</h3>
+          <p>Chain skips without touching the shore to build a multiplier that scales your score with each consecutive +1 bounce.</p>
+        </article>
+        <article class="card">
+          <div class="icon">🎯</div>
+          <h3>Ricochet Bounce Counter</h3>
+          <p>Counts every ricochet separately from the primary skip so you can see exactly how many extra hops the +1 script produced.</p>
+        </article>
+        <article class="card">
+          <div class="icon">📊</div>
+          <h3>Per-Bounce Score Tracking</h3>
+          <p>A live score readout logs each bounce individually, letting you audit the +1 gains across an entire run.</p>
+        </article>
+        <article class="card">
+          <div class="icon">⚡</div>
+          <h3>Lightweight Windows Build</h3>
+          <p>Ships as a native Windows 10 / 11 executable — no launcher, no background services, and negligible CPU overhead.</p>
+        </article>
+        <article class="card">
+          <div class="icon">🧩</div>
+          <h3>Open Source &amp; Configurable</h3>
+          <p>Every +1 rule, multiplier curve, and bounce threshold is editable in a plain config file — fork it and tune it your way.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">How it works</div>
+        <h2>Three steps from download to +1</h2>
+        <p>The script hooks into the skip event, adds one, and reports the bounce back to your score tracker.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body">
+            <h3>Download and extract</h3>
+            <p>Grab the latest build from the download button, unzip it anywhere, and run the +1 Stone Skipping executable. No installer and no admin rights required.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body">
+            <h3>Enable the +1 skip hook</h3>
+            <p>Launch a stone skipping run and toggle the script on. It attaches to the skip event and immediately starts adding +1 to each detected bounce.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="body">
+            <h3>Watch the combo climb</h3>
+            <p>Keep the stone hopping. The combo multiplier, ricochet counter, and per-bounce score panel all update live so you can see every +1 land.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section id="faq">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">FAQ</div>
+        <h2>Questions about the +1 script</h2>
+        <p>Short answers to the things people ask before downloading.</p>
+      </div>
+      <div class="faq">
+        <details open>
+          <summary>What exactly does the +1 Stone Skipping Script do?<span class="plus"></span></summary>
+          <p class="answer">It intercepts every skip event during a stone skipping run and adds exactly one to the count. On top of that it tracks a combo multiplier across consecutive skips, counts ricochet bounces separately, and logs a per-bounce score so you can see where the +1 gains came from.</p>
+        </details>
+        <details>
+          <summary>Which Windows versions are supported?<span class="plus"></span></summary>
+          <p class="answer">The build is tested on Windows 10 (21H2 and later) and Windows 11. It runs as a standard user process and does not require administrator privileges or any additional runtime installations.</p>
+        </details>
+        <details>
+          <summary>Is it really free and open source?<span class="plus
